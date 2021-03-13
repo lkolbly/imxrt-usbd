@@ -342,6 +342,9 @@ impl FullSpeed {
 
         let max_packet_size = buffer.len();
         qh.set_max_packet_len(max_packet_size);
+        if addr.index() == 1 {
+            qh.set_mult(1);
+        }
         qh.set_zero_length_termination(false);
         qh.set_interrupt_on_setup(
             EndpointType::Control == kind && addr.direction() == UsbDirection::Out,
@@ -416,11 +419,14 @@ impl FullSpeed {
         }
 
         if usbsts & USBSTS::UI::mask != 0 {
-            trace!(
+            info!(
                 "{:X} {:X}",
                 ral::read_reg!(ral::usb, self.usb, ENDPTSETUPSTAT),
                 ral::read_reg!(ral::usb, self.usb, ENDPTCOMPLETE)
             );
+            //let ep = self.endpoints[index(EndpointAddress::from_parts(1, UsbDirection::In))].as_mut().unwrap();
+            //ep.dbg(&self.usb);
+
             // Note: could be complete in one register read, but this is a little
             // easier to comprehend...
             self.ep_out = ral::read_reg!(ral::usb, self.usb, ENDPTCOMPLETE, ERCE) as u16;

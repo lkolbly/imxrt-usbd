@@ -60,6 +60,10 @@ impl Endpoint {
         }
     }
 
+    pub fn dbg(&self, usb: &ral::usb::Instance) {
+        info!("{} {:?} {}", self.is_primed(usb), self.td.status(), self.td.bytes_transferred());
+    }
+
     /// Indicates if the transfer descriptor is active
     pub fn is_primed(&self, usb: &ral::usb::Instance) -> bool {
         (match self.address.direction() {
@@ -183,6 +187,9 @@ impl Endpoint {
         self.td.set_buffer(self.buffer.as_ptr_mut(), size);
         self.td.set_interrupt_on_complete(true);
         self.td.set_active();
+        if self.address().index() == 1 {
+            self.td.set_mult(1);
+        }
         self.td.clean_invalidate_dcache();
 
         self.qh.overlay_mut().set_next(self.td);

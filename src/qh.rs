@@ -34,6 +34,10 @@ impl QH {
         self.setup.read()
     }
 
+    pub fn set_mult(&mut self, mult: u32) {
+        ral::modify_reg!(crate::qh, self, CAPABILITIES, MULT: mult);
+    }
+
     /// Returns the next TD overlay
     pub fn overlay_mut(&mut self) -> &mut TD {
         &mut self.overlay
@@ -73,6 +77,13 @@ impl QH {
 }
 
 mod CAPABILITIES {
+    pub mod MULT {
+        pub const offset: u32 = 30;
+        pub const mask: u32 = 0x3 << offset;
+        pub mod RW {}
+        pub mod R {}
+        pub mod W {}
+    }
     pub mod ZLT {
         pub const offset: u32 = 29;
         pub const mask: u32 = 1 << offset;

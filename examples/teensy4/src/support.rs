@@ -29,7 +29,7 @@ pub fn new_bus_adapter() -> imxrt_usbd::full_speed::BusAdapter {
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     log::error!("{}", info);
-    for _ in 0..10_000 {
+    loop {
         imxrt_uart_log::dma::poll();
     }
     teensy4_panic::sos()

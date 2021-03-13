@@ -46,6 +46,9 @@ version = "0.1"
 [dependencies.imxrt-uart-log]
 version = "0.2"
 
+[dependencies.alloc-cortex-m]
+version = "0.4.1"
+
 # Logging configuration, and logging within the
 # examples
 [dependencies.log]
@@ -63,6 +66,10 @@ path = "src/configured.rs"
 name = "serial"
 path = "src/serial.rs"
 
+[[bin]]
+name = "audio"
+path = "src/audio.rs"
+
 [lib]
 name = "support"
 path = "src/support.rs"
@@ -70,3 +77,6 @@ path = "src/support.rs"
 [[bin]]
 name = "test_class"
 path = "src/test_class.rs"
+
+[patch.crates-io]
+usb-device = { path = "../../../usb-device" }

@@ -105,6 +105,10 @@ impl TD {
             core::mem::size_of_val(self),
         );
     }
+
+    pub fn set_mult(&mut self, mult: u32) {
+        ral::modify_reg!(crate::td, self, TOKEN, MULT: mult);
+    }
 }
 
 bitflags::bitflags! {
@@ -126,6 +130,13 @@ mod TOKEN {
             pub const DATA_BUS_ERROR: u32 = 1 << 5;
             pub const TRANSACTION_ERROR: u32 = 1 << 3;
         }
+        pub mod R {}
+        pub mod W {}
+    }
+    pub mod MULT {
+        pub const offset: u32 = 10;
+        pub const mask: u32 = 0x3 << offset;
+        pub mod RW {}
         pub mod R {}
         pub mod W {}
     }
