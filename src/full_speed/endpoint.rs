@@ -187,7 +187,7 @@ impl Endpoint {
         self.td.set_buffer(self.buffer.as_ptr_mut(), size);
         self.td.set_interrupt_on_complete(true);
         self.td.set_active();
-        if self.address().index() == 1 {
+        if self.kind == EndpointType::Isochronous {
             self.td.set_mult(1);
         }
         self.td.clean_invalidate_dcache();
