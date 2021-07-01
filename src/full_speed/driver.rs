@@ -342,7 +342,7 @@ impl FullSpeed {
 
         let max_packet_size = buffer.len();
         qh.set_max_packet_len(max_packet_size);
-        if kind == EndpointType::Isochronous {
+        if let EndpointType::Isochronous(_) = kind {
             qh.set_mult(1);
         }
         qh.set_zero_length_termination(false);

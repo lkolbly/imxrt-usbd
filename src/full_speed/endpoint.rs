@@ -92,12 +92,13 @@ impl Endpoint {
     pub fn initialize(&mut self, usb: &ral::usb::Instance) {
         if self.address.index() != 0 {
             let endptctrl = endpoint_control::register(usb, self.address.index());
+            // TODO: Determine if these should be hardcoded to 2 (bulk), or should be our current kind
             match self.address.direction() {
                 UsbDirection::In => {
-                    ral::write_reg!(endpoint_control, &endptctrl, ENDPTCTRL, TXE: 0, TXT: EndpointType::Bulk as u32)
+                    ral::write_reg!(endpoint_control, &endptctrl, ENDPTCTRL, TXE: 0, TXT: 2)
                 }
                 UsbDirection::Out => {
-                    ral::write_reg!(endpoint_control, &endptctrl, ENDPTCTRL, RXE: 0, RXT: EndpointType::Bulk as u32)
+                    ral::write_reg!(endpoint_control, &endptctrl, ENDPTCTRL, RXE: 0, RXT: 2)
                 }
             }
         }
@@ -187,7 +188,7 @@ impl Endpoint {
         self.td.set_buffer(self.buffer.as_ptr_mut(), size);
         self.td.set_interrupt_on_complete(true);
         self.td.set_active();
-        if self.kind == EndpointType::Isochronous {
+        if self.is_isochronous() {
             self.td.set_mult(1);
         }
         self.td.clean_invalidate_dcache();
@@ -240,12 +241,28 @@ impl Endpoint {
             let endptctrl = endpoint_control::register(usb, self.address.index());
             match self.address.direction() {
                 UsbDirection::In => {
-                    ral::modify_reg!(endpoint_control, &endptctrl, ENDPTCTRL, TXE: 1, TXR: 1, TXT: self.kind as u32)
+                    ral::modify_reg!(endpoint_control, &endptctrl, ENDPTCTRL, TXE: 1, TXR: 1, TXT: self.kind_ident())
                 }
                 UsbDirection::Out => {
-                    ral::modify_reg!(endpoint_control, &endptctrl, ENDPTCTRL, RXE: 1, RXR: 1, RXT: self.kind as u32)
+                    ral::modify_reg!(endpoint_control, &endptctrl, ENDPTCTRL, RXE: 1, RXR: 1, RXT: self.kind_ident())
                 }
             }
+        }
+    }
+
+    fn is_isochronous(&self) -> bool {
+        match self.kind {
+            EndpointType::Isochronous(_) => true,
+            _ => false,
+        }
+    }
+
+    fn kind_ident(&self) -> u32 {
+        match self.kind {
+            EndpointType::Control => 0x0,
+            EndpointType::Isochronous(_) => 0x1,
+            EndpointType::Bulk => 0x2,
+            EndpointType::Interrupt => 0x3,
         }
     }
 

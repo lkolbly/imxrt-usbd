@@ -11,7 +11,7 @@
 #![no_main]
 
 use support::hal;
-use teensy4_bsp::t40;
+use teensy4_bsp::t41;
 
 const UART_BAUD: u32 = 115_200;
 const GPT_OCR: hal::gpt::OutputCompareRegister = hal::gpt::OutputCompareRegister::One;
@@ -28,7 +28,7 @@ fn main() -> ! {
         gpt1,
         ..
     } = hal::Peripherals::take().unwrap();
-    let pins = t40::into_pins(iomuxc);
+    let pins = t41::into_pins(iomuxc);
     let mut led = support::configure_led(pins.p13);
 
     // Timer for blinking
@@ -60,7 +60,7 @@ fn main() -> ! {
         hal::ccm::uart::ClockSelect::OSC,
         hal::ccm::uart::PrescalarSelect::DIVIDE_1,
     );
-    let uart = uarts.uart2.init(pins.p14, pins.p15, UART_BAUD).unwrap();
+    let uart = uarts.uart6.init(pins.p1, pins.p0, UART_BAUD).unwrap();
 
     let (tx, _) = uart.split();
     imxrt_uart_log::dma::init(tx, channel, Default::default()).unwrap();
@@ -70,6 +70,8 @@ fn main() -> ! {
 
     let bus_adapter = support::new_bus_adapter();
     bus_adapter.set_interrupts(true);
+
+    log::info!("Starting...");
 
     unsafe {
         let bus = usb_device::bus::UsbBusAllocator::new(bus_adapter);
@@ -91,6 +93,7 @@ fn main() -> ! {
     gpt1.set_enable(true);
     gpt1.set_output_compare_duration(GPT_OCR, TESTING_BLINK_PERIOD);
     led.set();
+    log::info!("Starting poll loop...");
     loop {
         imxrt_uart_log::dma::poll();
         time_elapse(&mut gpt1, || led.toggle());

@@ -48,7 +48,7 @@ impl<B: usb_device::bus::UsbBus> TestClass<'_, B> {
             cnt: 0,
             iface: alloc.interface(),
             iface2: alloc.interface(),
-            data_ep: alloc.isochronous(max_packet_size, 1),
+            data_ep: alloc.isochronous(IsochronousSynchronizationType::NoSynchronization, IsochronousUsageType::Data, max_packet_size, 1),
         }
     }
 }
@@ -159,8 +159,8 @@ impl<B: usb_device::bus::UsbBus> UsbAudio<'_, B> {
             iface: alloc.interface(),
             iface2: alloc.interface(),
             iface3: alloc.interface(),
-            data_ep: alloc.isochronous(200, 1),
-            source_ep: alloc.isochronous(64, 1),
+            data_ep: alloc.isochronous(IsochronousSynchronizationType::NoSynchronization, IsochronousUsageType::Data, 200, 1),
+            source_ep: alloc.isochronous(IsochronousSynchronizationType::NoSynchronization, IsochronousUsageType::Data, 64, 1),
             mic_data: data,
         }
     }
@@ -303,8 +303,8 @@ impl<'a, B: usb_device::bus::UsbBus> usb_device::class::UsbClass<B> for UsbAudio
             &[
                 0x02, // FORMAT_TYPE
                 0x01, // FORMAT_TYPE_I
-                1, // bSubslotSize (1 byte samples)
-                8, // bBitResolution (8 bits in byte used)
+                2, // bSubslotSize (1 byte samples)
+                16, // bBitResolution (8 bits in byte used)
             ]
         )?;
 
